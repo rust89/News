@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">Новости</string>
+
+    <string name="text_cancel">Отмена</string>
+    <string name="text_no_internet">Отсутствует подключение к интернету</string>
+    <string name="text_content_loading">Загрузка содержимого</string>
+    <string name="text_today">Сегодня</string>
+    <string name="text_yesterday">Вчера</string>
+    <string name="text_day_before_yesterday">Позавчера</string>
+
+    <string name="new_categories_fragment_update_list_msg">Обновление списка категорий</string>
+    <string name="new_categories_fragment_offline">Отсутствует интернет соединение</string>
+
+    <string name="navigation_drawer_item_title_news">Новости</string>
+    <string name="navigation_drawer_item_title_bookmarks">Закладки</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="main_news_tab_name">Главная</string>
+    <string name="news_pr">На правах рекламы</string>
+
+    <string name="action_settings">Settings</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="activity_news_action_share">Поделиться</string>
+    <string name="activity_news_action_refresh">Обновить</string>
+    <string name="activity_news_action_add_bookmark">Добавить в закладки</string>
+    <string name="activity_news_action_remove_bookmark">Удалить из закладок</string>
+
+    <string name="activity_news_msg_bookmark_add">Новость добавлена в закладки</string>
+    <string name="activity_news_msg_bookmark_remove">Новость удалена из закладок</string>
+
+</resources>

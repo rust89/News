@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="@dimen/item_news_horizontal_margin"
+    android:layout_marginRight="@dimen/item_news_horizontal_margin"
+    android:layout_marginBottom="@dimen/item_news_vertical_margin"
+    card_view:cardCornerRadius="6dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/item_news_horizontal_margin"
+        android:paddingRight="@dimen/item_news_horizontal_margin"
+        android:paddingTop="@dimen/item_news_vertical_margin"
+        android:paddingBottom="@dimen/item_news_vertical_margin">
+
+        <ImageView
+            android:id="@+id/news_logo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="@dimen/activity_vertical_extra_small_margin"
+            android:scaleType="fitCenter" />
+
+        <TextView
+            android:id="@+id/news_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/news_logo"
+            android:layout_marginBottom="@dimen/activity_vertical_extra_small_margin"
+            android:maxLines="3"
+            android:ellipsize="end"
+            android:textSize="@dimen/item_news_title_font_size" />
+
+        <TextView
+            android:id="@+id/news_pr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/news_title"
+            android:paddingTop="@dimen/activity_vertical_extra_super_small_margin"
+            android:paddingLeft="@dimen/activity_horizontal_extra_super_small_margin"
+            android:paddingRight="@dimen/activity_horizontal_extra_super_small_margin"
+            android:paddingBottom="@dimen/activity_vertical_extra_super_small_margin"
+            android:layout_marginBottom="@dimen/activity_vertical_extra_small_margin"
+            android:text="@string/news_pr"
+            android:background="@color/newsItemBackgroundColor"
+            android:textSize="@dimen/item_news_pr_font_size"
+            android:textColor="@color/newsItemPrFontColor"
+            />
+
+        <View
+            android:id="@+id/news_footer_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/news_pr"
+            android:layout_marginBottom="@dimen/activity_vertical_small_margin"
+            android:background="@color/newsItemFooterDividerColor"/>
+
+        <TextView
+            android:id="@+id/news_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/news_footer_divider"
+            android:layout_alignBottom="@+id/news_bookmark"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:gravity="center_vertical"
+            android:textColor="@color/newsItemFooterFontColor"
+            android:textSize="@dimen/item_news_footer_font_size" />
+
+        <ImageView
+            android:id="@+id/news_bookmark"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/news_footer_divider" />
+
+        <TextView
+            android:id="@+id/news_views"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/news_footer_divider"
+            android:layout_toLeftOf="@+id/news_bookmark"
+            android:layout_toStartOf="@+id/news_bookmark"
+            android:gravity="center_vertical"
+            android:drawablePadding="8dp"
+            android:textColor="@color/newsItemFooterFontColor"
+            android:textSize="@dimen/item_news_footer_font_size"/>
+
+        <!--
+
+
+
+
+
+
+
+
+        -->
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>
+

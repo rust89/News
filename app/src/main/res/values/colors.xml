@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="newsItemFooterFontColor">#99757575</color>
+    <color name="newsItemFooterDividerColor">#33757575</color>
+    <color name="newsItemPrFontColor">#FFFFFFFF</color>
+    <color name="newsItemBackgroundColor">#FFFF0000</color>
+
+    <color name="newsCategoryLabelBackgroundColor">#FF0000FF</color>
+    <color name="newsCategoryLabelTextColor">#FFFFFFFF</color>
+    <color name="fullNewsHeaderTextColor">#99757575</color>
+    <color name="fullNewsTitleTextColor">#DD000000</color>
+</resources>
