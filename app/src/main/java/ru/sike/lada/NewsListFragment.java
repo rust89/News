@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import ru.sike.lada.activities.NewsActivity;
 import ru.sike.lada.adapters.NewsRecyclerCursorAdapter;
 import ru.sike.lada.loaders.NewsShortCursorLoader;
 import ru.sike.lada.receivers.ShortNewsListUpdateCompleteReceivers;

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="ru.sike.lada.NewsActivity">
+    tools:context="ru.sike.lada.activities.NewsActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
@@ -147,6 +147,12 @@
                     android:textColor="@color/fullNewsTitleTextColor"/>
 
             </RelativeLayout>
+
+            <FrameLayout
+                android:id="@+id/new_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/test_html"

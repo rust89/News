@@ -1,4 +1,4 @@
-package ru.sike.lada;
+package ru.sike.lada.activities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -7,7 +7,8 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
@@ -21,13 +22,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-
+import ru.sike.lada.R;
 import ru.sike.lada.loaders.BookmarkCursorLoader;
 import ru.sike.lada.loaders.NewsFullCursorLoader;
 import ru.sike.lada.models.News;
@@ -37,6 +37,7 @@ import ru.sike.lada.services.NewsHelperService;
 import ru.sike.lada.utils.ConnectionChecker;
 import ru.sike.lada.utils.DateUtils;
 import ru.sike.lada.utils.DrawableUtils;
+import ru.sike.lada.utils.NewsContentBuilder;
 
 public class NewsActivity
         extends
@@ -105,6 +106,30 @@ public class NewsActivity
         }
     }
 
+    protected void setHeaderImage(String pPath) {
+        Drawable transitionDrawable = Drawable.createFromPath(pPath);
+        if (transitionDrawable != null) {
+            ImageView newsLogo = (ImageView) findViewById(R.id.news_logo);
+            AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
+
+            // извлекаем размеры картинки
+            int transitionDrawableWidth = transitionDrawable.getIntrinsicWidth();
+            int transitionDrawableHeight = transitionDrawable.getIntrinsicHeight();
+            // вычисляем пропорцию сторон
+            float drawableProportion = ((float)transitionDrawableWidth) / transitionDrawableHeight;
+            // вычисляем новую высоту appBar-а исходя из вычисленной пропорции картинки
+            int appBarWidth = getResources().getDisplayMetrics().widthPixels;
+            int appBarHeight = (int) Math.floor(appBarWidth / drawableProportion);
+            // устанавливаем новые размеры appBar-а
+            CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) appBarLayout.getLayoutParams();
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            layoutParams.height = appBarHeight;
+            appBarLayout.setLayoutParams(layoutParams);
+            // устнавливаем картинку
+            newsLogo.setImageDrawable(transitionDrawable);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,7 +154,7 @@ public class NewsActivity
             if (intent.hasExtra(EXTRA_TRANSITION_IMAGE_PATH)) {
                 String transitionImagePath = intent.getStringExtra(EXTRA_TRANSITION_IMAGE_PATH);
                 if (transitionImagePath != null && !transitionImagePath.isEmpty())
-                    newsLogo.setImageDrawable(Drawable.createFromPath(transitionImagePath));
+                    setHeaderImage(transitionImagePath);
             }
         }
         ViewCompat.setTransitionName(newsLogo, TRANSITION_NAME);
@@ -274,10 +299,9 @@ public class NewsActivity
 
     private void InitActivityView(News pNewsItem) {
         // устанавливаем картинку для новости
-        ImageView newsTitleImage = (ImageView) findViewById(R.id.news_logo);
         String pictureCachePath = pNewsItem.getBigPictureCachePath();
         if (pictureCachePath != null && !pictureCachePath.isEmpty())
-            newsTitleImage.setImageDrawable(Drawable.createFromPath(pictureCachePath));
+            setHeaderImage(pictureCachePath);
         //Glide.with(this).load(pNewsItem.getBigPicture()).diskCacheStrategy(DiskCacheStrategy.SOURCE).into(newsTitleImage);
 
         // устнавливаем категорию для новости
@@ -308,11 +332,14 @@ public class NewsActivity
         TextView newsTitle = (TextView) findViewById(R.id.news_title);
         newsTitle.setText(pNewsItem.getTitle());
 
-        TextView textView = (TextView) findViewById(R.id.test_html);
-        textView.setText(pNewsItem.getHtml());
+        FrameLayout newContentContainer = (FrameLayout) findViewById(R.id.new_content);
+        NewsContentBuilder newsContentBuilder = new NewsContentBuilder();
+        newContentContainer.addView(newsContentBuilder.Build(this, pNewsItem.getHtml()));
+
 
         View progressView = findViewById(R.id.progressContainer);
         View contentContainer = findViewById(R.id.nested_scroll);
+
         progressView.setVisibility(View.GONE);
         contentContainer.setVisibility(View.VISIBLE);
     }

@@ -13,4 +13,7 @@
     <color name="newsCategoryLabelTextColor">#FFFFFFFF</color>
     <color name="fullNewsHeaderTextColor">#99757575</color>
     <color name="fullNewsTitleTextColor">#DD000000</color>
+    <color name="fullNewsPreviewBackgroundColor">#FFEEEEEE</color>
+    <color name="fullNewsPreviewBackgroundBorderColor">#FFBBBBBB</color>
+    <color name="fullNewsPreviewTextColor">#DD000000</color>
 </resources>
