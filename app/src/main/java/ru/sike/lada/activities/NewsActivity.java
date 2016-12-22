@@ -214,6 +214,8 @@ public class NewsActivity
                 item.setIcon(DrawableUtils.getTinted(item.getIcon(), getResources().getColor(R.color.colorAccent)));
                 if ((currentBookMarkStatus == BookmarkStatus.NOT_ADDED) || (currentBookMarkStatus == BookmarkStatus.UNDEFINED))
                     item.setVisible(false);
+            } else if (item.getItemId() == R.id.action_news_share) {
+                item.setVisible(mNews != null);
             }
 
         }
@@ -236,8 +238,21 @@ public class NewsActivity
                 NewsHelperService.startActionAddToBookmarks(this, getNewsId(), 0);
                 return true;
             }
+            case R.id.action_news_share: {
+                shareCurrentNews();
+                return true;
+            }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    protected void shareCurrentNews() {
+        if (mNews != null) {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, mNews.getFullLink());
+            startActivity(Intent.createChooser(intent, getString(R.string.activity_news_action_share)));
+        }
     }
 
     @Override
@@ -257,6 +272,7 @@ public class NewsActivity
             if (data.moveToFirst()) {
                 mNews = new News(data);
                 InitActivityView(mNews);
+                invalidateOptionsMenu();
             }
 
         } else if (loader.getId() == BOOKMARK_LOADER) {

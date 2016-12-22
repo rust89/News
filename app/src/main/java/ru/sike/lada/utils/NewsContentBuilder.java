@@ -1,6 +1,7 @@
 package ru.sike.lada.utils;
 
 import android.content.Context;
+import android.text.Html;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -70,7 +71,7 @@ public class NewsContentBuilder {
                 previewLayout.setBackground(pContext.getResources().getDrawable(R.drawable.news_preview_background));
                 previewLayout.setPadding(horizontalSmallPadding, verticalSmallPadding, horizontalSmallPadding, verticalSmallPadding);
                 previewLayout.setTextColor(pContext.getResources().getColor(R.color.fullNewsPreviewTextColor));
-                previewLayout.setText(content);
+                previewLayout.setText(Html.fromHtml(content));
             }
         }
         return previewLayout;
@@ -83,7 +84,7 @@ public class NewsContentBuilder {
             if (content != null && !content.isEmpty()) {
                 previewLayout = new TextView(pContext);
                 previewLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                previewLayout.setText(content);
+                previewLayout.setText(Html.fromHtml(content));
             }
         }
         return previewLayout;
