@@ -16,6 +16,7 @@ import java.io.File;
 
 import ru.sike.lada.R;
 import ru.sike.lada.database.DataContract;
+import ru.sike.lada.ui.ImageViewEx;
 import ru.sike.lada.utils.DateUtils;
 import ru.sike.lada.utils.DrawableUtils;
 import ru.sike.lada.utils.caching.CacheExecutorProvider;
@@ -31,8 +32,20 @@ public class NewsRecyclerCursorAdapter extends CursorRecyclerViewAdapter<Recycle
     private String mDayBeforeYesterday;
     private boolean mFooterVisible = false;
 
+    private int mColumnIndexId = -1;
+    private int mColumnIndexTitle = -1;
+    private int mColumnIndexPr = -1;
+    private int mColumnIndexSmallImageCachePath = -1;
+    private int mColumnIndexSmallImageCacheMd5 = -1;
+    private int mColumnIndexBigImageCachePath = -1;
+    private int mColumnIndexBigImageCacheMd5 = -1;
+    private int mColumnIndexViewCount = -1;
+    private int mColumnIndexDate = -1;
+    private int mColumnIndexBookMark = -1;
+
     public NewsRecyclerCursorAdapter(Context pContext, Cursor pCursor, IOnItemClickListener pOnItemClickListener){
         super(pContext, pCursor);
+        updateCoumnIndexesByCursor(pCursor);
         mOnItemClickListener = pOnItemClickListener;
         mToday = pContext.getString(R.string.text_today);
         mYesterday = pContext.getString(R.string.text_yesterday);
@@ -40,7 +53,7 @@ public class NewsRecyclerCursorAdapter extends CursorRecyclerViewAdapter<Recycle
     }
 
     public static class ItemViewHolder extends RecyclerView.ViewHolder {
-        public ImageView logo;
+        public ImageViewEx logo;
         public TextView title;
         public TextView pr;
         public TextView views;
@@ -50,7 +63,7 @@ public class NewsRecyclerCursorAdapter extends CursorRecyclerViewAdapter<Recycle
 
         public ItemViewHolder(View view, Context context) {
             super(view);
-            logo = (ImageView) view.findViewById(R.id.news_logo);
+            logo = (ImageViewEx) view.findViewById(R.id.news_logo);
             title = (TextView) view.findViewById(R.id.news_title);
             pr = (TextView) view.findViewById(R.id.news_pr);
             views = (TextView) view.findViewById(R.id.news_views);
@@ -99,22 +112,22 @@ public class NewsRecyclerCursorAdapter extends CursorRecyclerViewAdapter<Recycle
 
             // получаем значения полей
             ItemViewHolder viewHolder = (ItemViewHolder)pViewHolder;
-            final long id = pCursor.getLong(pCursor.getColumnIndex(DataContract.News._ID));
-            String title = pCursor.getString(pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_TITLE));
-            int pr = pCursor.getInt(pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_PR));
-            String smallImageUrl = pCursor.getString(pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_SMALL_PICTURE));
-            final String smallImageCachePath = pCursor.getString(pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_SMALL_PICTURE_CACHE_PATH));
-            String bigImageUrl = pCursor.getString(pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_BIG_PICTURE));
-            final String bigImageCachePath = pCursor.getString(pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_BIG_PICTURE_CACHE_PATH));
-            int viewCount = pCursor.getInt(pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_VIEWS));
-            long date = pCursor.getLong(pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_DATE));
-            int bookmark = pCursor.getInt(pCursor.getColumnIndex("bookmarked"));
+            final long id = pCursor.getLong(mColumnIndexId);
+            String title = pCursor.getString(mColumnIndexTitle);
+            int pr = pCursor.getInt(mColumnIndexPr);
+            final String smallImageCachePath = pCursor.getString(mColumnIndexSmallImageCachePath);
+            final String smallImageCacheMd5 = pCursor.getString(mColumnIndexSmallImageCacheMd5);
+            final String bigImageCachePath = pCursor.getString(mColumnIndexBigImageCachePath);
+            final String bigImageCacheMd5 = pCursor.getString(mColumnIndexBigImageCacheMd5);
+            int viewCount = pCursor.getInt(mColumnIndexViewCount);
+            long date = pCursor.getLong(mColumnIndexDate);
+            int bookmark = pCursor.getInt(mColumnIndexBookMark);
 
             // для первой записи загружаем большую картинку
             if (pCursor.getPosition() == 0) {
                 if (bigImageCachePath != null && !bigImageCachePath.isEmpty()) {
                     viewHolder.logo.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                    viewHolder.logo.setImageURI(Uri.fromFile(new File(bigImageCachePath)));
+                    viewHolder.logo.setSource(bigImageCachePath, bigImageCacheMd5);
                 } else {
                     viewHolder.logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                     viewHolder.logo.setImageResource(R.drawable.ic_newspaper_black_24dp);
@@ -123,7 +136,7 @@ public class NewsRecyclerCursorAdapter extends CursorRecyclerViewAdapter<Recycle
             } else {
                 if (smallImageCachePath != null && !smallImageCachePath.isEmpty()) {
                     viewHolder.logo.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                    viewHolder.logo.setImageURI(Uri.fromFile(new File(smallImageCachePath)));
+                    viewHolder.logo.setSource(smallImageCachePath, smallImageCacheMd5);
                 } else {
                     viewHolder.logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                     viewHolder.logo.setImageResource(R.drawable.ic_newspaper_black_24dp);
@@ -172,6 +185,28 @@ public class NewsRecyclerCursorAdapter extends CursorRecyclerViewAdapter<Recycle
                 notifyItemRangeRemoved(positionStart + 1, 1);
             }
         }
+    }
+
+    private void updateCoumnIndexesByCursor(Cursor pCursor) {
+        if (pCursor != null) {
+            mColumnIndexId = pCursor.getColumnIndex(DataContract.News._ID);
+            mColumnIndexTitle = pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_TITLE);
+            mColumnIndexPr = pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_PR);
+            mColumnIndexSmallImageCachePath = pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_SMALL_PICTURE_CACHE_PATH);
+            mColumnIndexSmallImageCacheMd5 = pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_SMALL_PICTURE_CACHE_MD5);
+            mColumnIndexBigImageCachePath = pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_BIG_PICTURE_CACHE_PATH);
+            mColumnIndexBigImageCacheMd5 = pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_BIG_PICTURE_CACHE_MD5);
+            mColumnIndexViewCount = pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_VIEWS);
+            mColumnIndexDate = pCursor.getColumnIndex(DataContract.News.COLUMN_NAME_DATE);
+            mColumnIndexBookMark = pCursor.getColumnIndex("bookmarked");
+        }
+    }
+
+    @Override
+    public Cursor swapCursor(Cursor newCursor) {
+        Cursor result = super.swapCursor(newCursor);
+        updateCoumnIndexesByCursor(newCursor);
+        return result;
     }
 
     public interface IOnItemClickListener {

@@ -20,7 +20,9 @@ public class NewsShortCursorLoader extends CursorLoader {
                         DataContract.News.COLUMN_NAME_DATE,
                         DataContract.News.COLUMN_NAME_PR,
                         DataContract.News.COLUMN_NAME_SMALL_PICTURE_CACHE_PATH,
+                        DataContract.News.COLUMN_NAME_SMALL_PICTURE_CACHE_MD5,
                         DataContract.News.COLUMN_NAME_BIG_PICTURE_CACHE_PATH,
+                        DataContract.News.COLUMN_NAME_BIG_PICTURE_CACHE_MD5,
                         "(select count(" + DataContract.NewsBookmarks.TABLE_NAME + "." + DataContract.NewsBookmarks._ID +
                                 ") from " + DataContract.NewsBookmarks.TABLE_NAME + " where " +
                                 DataContract.NewsBookmarks.TABLE_NAME + "." + DataContract.NewsBookmarks.COLUMN_NAME_NEWS_ID +

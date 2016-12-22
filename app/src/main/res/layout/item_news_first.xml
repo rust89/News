@@ -19,7 +19,7 @@
         android:paddingTop="@dimen/item_news_vertical_margin"
         android:paddingBottom="@dimen/item_news_vertical_margin">
 
-        <ImageView
+        <ru.sike.lada.ui.ImageViewEx
             android:id="@+id/news_logo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
