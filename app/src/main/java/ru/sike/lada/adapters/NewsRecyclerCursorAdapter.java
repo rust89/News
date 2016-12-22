@@ -50,6 +50,7 @@ public class NewsRecyclerCursorAdapter extends CursorRecyclerViewAdapter<Recycle
         mToday = pContext.getString(R.string.text_today);
         mYesterday = pContext.getString(R.string.text_yesterday);
         mDayBeforeYesterday = pContext.getString(R.string.text_day_before_yesterday);
+        setHasStableIds(true);
     }
 
     public static class ItemViewHolder extends RecyclerView.ViewHolder {
@@ -126,7 +127,7 @@ public class NewsRecyclerCursorAdapter extends CursorRecyclerViewAdapter<Recycle
             // для первой записи загружаем большую картинку
             if (pCursor.getPosition() == 0) {
                 if (bigImageCachePath != null && !bigImageCachePath.isEmpty()) {
-                    viewHolder.logo.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                    viewHolder.logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
                     viewHolder.logo.setSource(bigImageCachePath, bigImageCacheMd5);
                 } else {
                     viewHolder.logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);

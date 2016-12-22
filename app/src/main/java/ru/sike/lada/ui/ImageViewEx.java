@@ -5,6 +5,9 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+
 public class ImageViewEx extends ImageView {
 
     private String mPath;
@@ -29,7 +32,12 @@ public class ImageViewEx extends ImageView {
         if (!mPath.equals(pPath) || !mMd5.equals(pMd5)) {
             mPath = pPath;
             mMd5 = pMd5;
-            setImageDrawable(Drawable.createFromPath(mPath));
+            Glide
+                .with(getContext())
+                .load(mPath)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .into(this);
         }
     }
 
