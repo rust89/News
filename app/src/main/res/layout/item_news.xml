@@ -41,6 +41,7 @@
             android:layout_above="@+id/news_pr"
             android:maxLines="3"
             android:ellipsize="end"
+            android:textColor="@color/newsItemTitleColor"
             android:textSize="@dimen/item_news_title_font_size"
             />
 

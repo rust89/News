@@ -8,9 +8,6 @@
     <string name="text_yesterday">Вчера</string>
     <string name="text_day_before_yesterday">Позавчера</string>
 
-    <string name="new_categories_fragment_update_list_msg">Обновление списка категорий</string>
-    <string name="new_categories_fragment_offline">Отсутствует интернет соединение</string>
-
     <string name="navigation_drawer_item_title_news">Новости</string>
     <string name="navigation_drawer_item_title_bookmarks">Закладки</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>

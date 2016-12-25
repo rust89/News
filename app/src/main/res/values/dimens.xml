@@ -17,7 +17,7 @@
     <dimen name="item_news_horizontal_margin">8dp</dimen>
     <dimen name="item_news_vertical_margin">8dp</dimen>
 
-    <dimen name="item_news_title_font_size">16sp</dimen>
+    <dimen name="item_news_title_font_size">15sp</dimen>
     <dimen name="item_news_pr_font_size">10sp</dimen>
     <dimen name="item_news_footer_font_size">12sp</dimen>
     <dimen name="app_bar_height">220dp</dimen>

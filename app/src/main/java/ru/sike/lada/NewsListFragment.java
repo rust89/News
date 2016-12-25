@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -46,12 +48,13 @@ public class NewsListFragment
     private static final String FIRST_TIME_LOADED_BUNDLE_NAME = "firstTimeLoaded";
     private static final String WAIT_FOR_UPDATE_COMPLETE_BUNDLE_NAME = "waitForUpdateComplete";
     private static final int startNewsActivityRequestCode = 1;
-
     private static final int newsListLoaderId = 0;
+
     private int fetchNewsFrom = 1;
     private boolean firstTimeLoaded = false;
     private boolean isVisibleForUser = false;
     private boolean waitForUpdateComplete = false;
+    static int mPreviousLastVisibleItemPostion = -1;
 
     // создаем BroadcastReceiver
     ShortNewsListUpdateCompleteReceivers mShortNewsListUpdateCompleteReceivers = new ShortNewsListUpdateCompleteReceivers() {
@@ -60,7 +63,7 @@ public class NewsListFragment
             ShortNewsListUpdateResult result = intent.getParcelableExtra(ShortNewsListUpdateCompleteReceivers.BROADCAST_PARAM);
             try {
                 if (result.getCategoryId() == getCategoryId())
-                    UpdateShortNewsListComplete(result.isIsSuccessfull(), result.getMessage());
+                    UpdateShortNewsListComplete(result.getStatus(), result.getMessage());
             } catch (Exception Ex) {
                 Log.e(LOG_TAG, Ex.getMessage());
             }
@@ -81,12 +84,11 @@ public class NewsListFragment
     }
 
     private void startUpdateService(long pCategoryId, int pFetchNewsFrom, int pFetchNewsCountPerRequest) {
-        Context context = getContext();
-        if (context != null) {
+        Log.d(LOG_TAG, "startUpdateService");
+        if (!waitForUpdateComplete) {
             waitForUpdateComplete = true;
-            DataUpdateService.startActionUpdateNewsShort(context, pCategoryId, pFetchNewsFrom, pFetchNewsCountPerRequest);
+            DataUpdateService.startActionUpdateNewsShort(getContext(), pCategoryId, pFetchNewsFrom, pFetchNewsCountPerRequest);
         }
-
     }
 
     private long getCategoryId() throws Exception {
@@ -107,22 +109,39 @@ public class NewsListFragment
         }
     }
 
-    private void UpdateShortNewsListComplete(boolean pResult, String pMessage) {
-        if (pResult) {
-            View rootView = getView();
-            if (rootView != null) {
-                SwipeRefreshLayout refresher = (SwipeRefreshLayout) rootView.findViewById(R.id.refresher);
-                refresher.setRefreshing(false);
+    private void HideProgressWithMessage(boolean pShowMessage, String pMessage) {
+        // останавливаем индикатор загрузки,
+        // убираем индикатор загрузки из списка
+        View rootView = getView();
+        if (rootView != null) {
+            SwipeRefreshLayout refresher = (SwipeRefreshLayout) rootView.findViewById(R.id.refresher);
+            refresher.setRefreshing(false);
 
-                RecyclerView listNews = (RecyclerView) rootView.findViewById(R.id.list_news);
-                NewsRecyclerCursorAdapter adapter = (NewsRecyclerCursorAdapter) listNews.getAdapter();
-                if (adapter != null)
-                    adapter.setFooterVisible(false);
-            }
-        } else {
-            Log.e(LOG_TAG, pMessage);
+            RecyclerView listNews = (RecyclerView) rootView.findViewById(R.id.list_news);
+            NewsRecyclerCursorAdapter adapter = (NewsRecyclerCursorAdapter) listNews.getAdapter();
+            if (adapter != null)
+                adapter.setFooterVisible(false);
+            // если во время загрузки произошла ошибка, то оповещаем об этом пользователя
+            if (pShowMessage)
+                Snackbar.make(rootView, pMessage, Snackbar.LENGTH_SHORT).show();
+
+            waitForUpdateComplete = false;
         }
-        waitForUpdateComplete = false;
+    }
+
+    private void UpdateShortNewsListComplete(ShortNewsListUpdateCompleteReceivers.Status pStatus, String pMessage) {
+        if (pStatus == ShortNewsListUpdateCompleteReceivers.Status.Success
+                || pStatus == ShortNewsListUpdateCompleteReceivers.Status.Fail) {
+            HideProgressWithMessage(pStatus == ShortNewsListUpdateCompleteReceivers.Status.Fail, pMessage);
+        } else if (pStatus == ShortNewsListUpdateCompleteReceivers.Status.NoInternet) {
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    HideProgressWithMessage(true, getString(R.string.text_no_internet));
+                }
+            }, 1000);
+        }
     }
 
     @Override
@@ -204,27 +223,35 @@ public class NewsListFragment
                             LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
                             int pastVisibleItemPosition = lm.findLastVisibleItemPosition();
                             int totalItemCount = lm.getItemCount();
+
+                            if (mPreviousLastVisibleItemPostion < 0)
+                                mPreviousLastVisibleItemPostion = pastVisibleItemPosition;
+
                             if (!waitForUpdateComplete && (pastVisibleItemPosition + 1 == totalItemCount)) {
-                                fetchNewsFrom += fetchNewsCountPerRequest;
 
-                                recyclerView.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        RecyclerView listNews = (RecyclerView) getView().findViewById(R.id.list_news);
-                                        NewsRecyclerCursorAdapter adapter = (NewsRecyclerCursorAdapter) listNews.getAdapter();
-                                        if (adapter != null)
-                                            adapter.setFooterVisible(true);
-                                        try {
-                                            long categoryId = getCategoryId();
-                                            startUpdateService(categoryId, fetchNewsFrom, fetchNewsCountPerRequest);
-                                        } catch (Exception Ex) {
-                                            Log.e(LOG_TAG, Ex.getMessage());
+                                if (pastVisibleItemPosition > mPreviousLastVisibleItemPostion) {
+                                    fetchNewsFrom += fetchNewsCountPerRequest;
+                                    recyclerView.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+
+                                            // включаем индикатор загрузки
+                                            RecyclerView listNews = (RecyclerView) getView().findViewById(R.id.list_news);
+                                            NewsRecyclerCursorAdapter adapter = (NewsRecyclerCursorAdapter) listNews.getAdapter();
+                                            if (adapter != null)
+                                                adapter.setFooterVisible(true);
+                                            // запускаем сервис обновления
+                                            try {
+                                                startUpdateService(getCategoryId(), fetchNewsFrom, fetchNewsCountPerRequest);
+                                            } catch (Exception Ex) {
+                                                Log.e(LOG_TAG, Ex.getMessage());
+                                            }
                                         }
-                                    }
-                                });
-
-
+                                    });
+                                }
                             }
+
+                            mPreviousLastVisibleItemPostion = pastVisibleItemPosition;
                         }
                     });
                 }
@@ -251,7 +278,6 @@ public class NewsListFragment
         if (id == newsListLoaderId) {
             try {
                 long categoryId = getCategoryId();
-                //Log.d(LOG_TAG, "onCreateLoader " + getCategoryName());
                 return new NewsShortCursorLoader(NewsListFragment.this.getContext(), categoryId);
             } catch (Exception Ex) {
                 Log.e(LOG_TAG, Ex.getMessage());
@@ -309,34 +335,16 @@ public class NewsListFragment
     @Override
     public void onRefresh() {
         fetchNewsFrom = 1;
-        Activity contextActivity = getActivity();
-        if (contextActivity != null) {
-            if (ConnectionChecker.check(contextActivity)) {
-                try {
-
-                    View rootView = getView();
-                    if (rootView != null) {
-                        SwipeRefreshLayout refresher = (SwipeRefreshLayout) rootView.findViewById(R.id.refresher);
-                        if (!refresher.isRefreshing())
-                            refresher.setRefreshing(true);
-                    }
-
-                    long categoryId = getCategoryId();
-                    startUpdateService(categoryId, fetchNewsFrom, fetchNewsCountPerRequest);
-                } catch (Exception Ex) {
-                    Log.e(LOG_TAG, Ex.getMessage());
-                }
-            } else {
-                View rootView = getView();
-                if (rootView != null) {
-                    Snackbar.make(rootView, R.string.text_no_internet, Snackbar.LENGTH_SHORT).show();
-                    SwipeRefreshLayout refresher = (SwipeRefreshLayout) rootView.findViewById(R.id.refresher);
-                    if (refresher.isRefreshing())
-                        refresher.setRefreshing(false);
-                }
+        try {
+            View rootView = getView();
+            if (rootView != null) {
+                SwipeRefreshLayout refresher = (SwipeRefreshLayout) rootView.findViewById(R.id.refresher);
+                if (!refresher.isRefreshing())
+                    refresher.setRefreshing(true);
             }
-        } else {
-            Log.e(LOG_TAG, "contextActivity is null for startNewsListUpdate");
+            startUpdateService(getCategoryId(), fetchNewsFrom, fetchNewsCountPerRequest);
+        } catch (Exception Ex) {
+            Log.e(LOG_TAG, Ex.getMessage());
         }
     }
 

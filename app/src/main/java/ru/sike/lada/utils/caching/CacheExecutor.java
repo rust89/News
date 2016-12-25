@@ -28,7 +28,7 @@ public class CacheExecutor {
                 if (currentTime - cacheInfo.getLastUpdate() > Constants.news_image_cache_expire_period) {
                     // скачиваем файл
                     byte[] buffer = Downloader.Download(cacheInfo.getUrl());
-                    if (buffer != null) {
+                    if (buffer != null && buffer.length > 0) {
                         String buffer_md5 = Downloader.getMD5(buffer);
                         String previousFilePath = cacheInfo.getCachePath();
 

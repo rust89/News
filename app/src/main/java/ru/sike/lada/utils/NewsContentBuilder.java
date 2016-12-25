@@ -33,7 +33,7 @@ public class NewsContentBuilder {
         // временная переменная
         Elements elements;
 
-        Document doc = Jsoup.parse(pHtml);
+        Document doc = Jsoup.parse(pHtml != null ? pHtml : "");
         elements = doc.getElementsByClass(rootClass);
 
         // контейнер с содержимым новости

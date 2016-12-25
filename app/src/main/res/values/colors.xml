@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
+    <color name="newsItemTitleColor">#BB000000</color>
     <color name="newsItemFooterFontColor">#99757575</color>
     <color name="newsItemFooterDividerColor">#33757575</color>
     <color name="newsItemPrFontColor">#FFFFFFFF</color>

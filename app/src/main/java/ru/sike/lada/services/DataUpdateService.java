@@ -16,9 +16,11 @@ import ru.sike.lada.backend.json.Category;
 import ru.sike.lada.backend.json.NewsFull;
 import ru.sike.lada.backend.json.NewsShort;
 import ru.sike.lada.receivers.FullNewsUpdateReceiver;
+import ru.sike.lada.receivers.NewsCategoryUpdateReceiver;
 import ru.sike.lada.receivers.ShortNewsListUpdateCompleteReceivers;
 import ru.sike.lada.services.updaters.CategoryUpdater;
 import ru.sike.lada.services.updaters.NewsUpdater;
+import ru.sike.lada.utils.ConnectionChecker;
 import ru.sike.lada.utils.caching.CacheExecutorProvider;
 import ru.sike.lada.utils.caching.CacheTaskFactory;
 
@@ -81,39 +83,56 @@ public class DataUpdateService extends IntentService {
     }
 
     private void handleActionUpdateNewsCategories() {
-        try {
-            LadaKzService service = ServiceGenerator.getApiInterface();
-            Call<List<Category>> call = service.getCategories();
-            Response<List<Category>> response = call.execute();
-            if (response.isSuccessful()) {
-                CategoryUpdater updater = new CategoryUpdater(DataUpdateService.this);
-                updater.Update(response.body());
-            } else {
-                throw new Exception(response.message());
+        NewsCategoryUpdateReceiver.Status result = NewsCategoryUpdateReceiver.Status.Fail;
+        String message = "";
+
+        if (ConnectionChecker.check(this)) {
+            try {
+                LadaKzService service = ServiceGenerator.getApiInterface();
+                Call<List<Category>> call = service.getCategories();
+                Response<List<Category>> response = call.execute();
+                if (response.isSuccessful()) {
+                    CategoryUpdater updater = new CategoryUpdater(DataUpdateService.this);
+                    updater.Update(response.body());
+                    result = NewsCategoryUpdateReceiver.Status.Success;
+                } else {
+                    throw new Exception(response.message());
+                }
+            } catch (Exception Ex) {
+                message = Ex.getMessage();
+                Ex.printStackTrace();
             }
-        } catch (Exception Ex) {
-            Ex.printStackTrace();
+        } else {
+            result = NewsCategoryUpdateReceiver.Status.NoInternet;
         }
+
+        NewsCategoryUpdateReceiver.Broadcast(this,
+                new NewsCategoryUpdateReceiver.NewsCategoryUpdateResult(result, message));
     }
 
     private void handleActionUpdateNewsShort(long categoryId, int fetchFrom, int fetchCount) {
-        boolean result = false;
+        ShortNewsListUpdateCompleteReceivers.Status result = ShortNewsListUpdateCompleteReceivers.Status.Fail;
         String message = "";
-        try {
-            LadaKzService service = ServiceGenerator.getApiInterface();
-            Call<List<NewsShort>> call = categoryId != Long.MAX_VALUE ?
-                    service.getNewsShort(categoryId, fetchFrom, fetchCount) : service.getMainNewsShort(fetchFrom, fetchCount);
-            Response<List<NewsShort>> response = call.execute();
-            if (response.isSuccessful()) {
-                NewsUpdater newsShortUpdater = new NewsUpdater(DataUpdateService.this);
-                newsShortUpdater.Update(response.body(), categoryId);
-            } else {
-                throw new Exception(response.message());
+
+        if (ConnectionChecker.check(this)) {
+            try {
+                LadaKzService service = ServiceGenerator.getApiInterface();
+                Call<List<NewsShort>> call = categoryId != Long.MAX_VALUE ?
+                        service.getNewsShort(categoryId, fetchFrom, fetchCount) : service.getMainNewsShort(fetchFrom, fetchCount);
+                Response<List<NewsShort>> response = call.execute();
+                if (response.isSuccessful()) {
+                    NewsUpdater newsShortUpdater = new NewsUpdater(DataUpdateService.this);
+                    newsShortUpdater.Update(response.body(), categoryId);
+                } else {
+                    throw new Exception(response.message());
+                }
+                result = ShortNewsListUpdateCompleteReceivers.Status.Success;
+            } catch (Exception Ex) {
+                Ex.printStackTrace();
+                message = Ex.getMessage();
             }
-            result = true;
-        } catch (Exception Ex) {
-            Ex.printStackTrace();
-            message = Ex.getMessage();
+        } else {
+            result = ShortNewsListUpdateCompleteReceivers.Status.NoInternet;
         }
 
         ShortNewsListUpdateCompleteReceivers.Broadcast(this,

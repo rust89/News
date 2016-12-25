@@ -2,8 +2,11 @@ package ru.sike.lada;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -22,6 +25,8 @@ import java.util.List;
 
 import ru.sike.lada.loaders.NewsCategoriesCursorLoader;
 import ru.sike.lada.models.NewsCategory;
+import ru.sike.lada.receivers.FullNewsUpdateReceiver;
+import ru.sike.lada.receivers.NewsCategoryUpdateReceiver;
 import ru.sike.lada.services.DataUpdateService;
 import ru.sike.lada.utils.ConnectionChecker;
 
@@ -42,6 +47,26 @@ public class NewsCategoriesFragment
     private int selectedPageIndex = 0;
     private boolean waitToRestore = false;
 
+    NewsCategoryUpdateReceiver mNewsCategoryUpdateReceiver = new NewsCategoryUpdateReceiver() {
+        // действия при получении сообщений
+        public void onReceive(Context context, Intent intent) {
+            NewsCategoryUpdateResult result = intent.getParcelableExtra(NewsCategoryUpdateReceiver.BROADCAST_PARAM);
+            if (result.getStatus() == Status.NoInternet) {
+                View rootView = getView();
+                if (rootView != null)
+                    Snackbar.make(rootView, getString(R.string.text_no_internet), Snackbar.LENGTH_SHORT).show();
+            } else if (result.getStatus() == Status.Fail) {
+                View rootView = getView();
+                if (rootView != null)
+                    Snackbar.make(rootView, result.getMessage(), Snackbar.LENGTH_SHORT).show();
+            }
+
+            LoaderManager lm = getLoaderManager();
+            if (lm != null)
+                lm.initLoader(NEWS_CATEGORIES_LOADER, null, NewsCategoriesFragment.this).forceLoad();
+        }
+    };
+
     public NewsCategoriesFragment() {
         // Required empty public constructor
     }
@@ -53,31 +78,27 @@ public class NewsCategoriesFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(LOG_TAG, "onCreate");
+        getActivity().registerReceiver(mNewsCategoryUpdateReceiver, new IntentFilter(NewsCategoryUpdateReceiver.BROADCAST_ACTION));
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.i(LOG_TAG, "onDestroy");
+        getActivity().unregisterReceiver(mNewsCategoryUpdateReceiver);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_news_categories, container, false);
-        Button btnRefresh = (Button) rootView.findViewById(R.id.new_categories_fragment_refresh);
-        btnRefresh.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View pView) {
-                Context context = getContext();
-                if ((context != null) && ConnectionChecker.check(context)) {
-                    View rootView = getView();
-                    if (rootView != null) {
-                        ViewPager viewPager = (ViewPager) rootView.findViewById(R.id.news_categories_pager);
-                        View progressView = rootView.findViewById(R.id.news_categories_progress);
-                        View offlineView = rootView.findViewById(R.id.news_categories_offline);
-                        viewPager.setVisibility(View.GONE);
-                        progressView.setVisibility(View.VISIBLE);
-                        offlineView.setVisibility(View.GONE);
-                    }
-                    DataUpdateService.startActionUpdateNewsCategories(context);
-                }
-            }
-        });
+
+        ViewPager viewPager = (ViewPager) rootView.findViewById(R.id.news_categories_pager);
+        NewsCategoriesPagerAdapter adapter = new NewsCategoriesPagerAdapter(
+                getChildFragmentManager(), null);
+        viewPager.setAdapter(adapter);
+
         return rootView;
     }
 
@@ -98,45 +119,19 @@ public class NewsCategoriesFragment
                 waitToRestore = savedInstanceState.getBoolean(WAIT_TO_RESTORE_BUNDLE_NAME);
         }
 
-        Activity contextActivity = getActivity();
-        // настройка вкладок
-        if (contextActivity != null) {
-            TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.tab_layout);
-            if (tabLayout != null) {
-                tabLayout.setVisibility(View.VISIBLE);
-                View rootView = getView();
-                if (rootView != null) {
-                    ViewPager viewPager = (ViewPager) rootView.findViewById(R.id.news_categories_pager);
-                    tabLayout.setupWithViewPager(viewPager);
-                } else {
-                    Log.e(LOG_TAG, "rootView is null on onActivityCreated callback");
-                }
-
-            }
-            // инициализация вкладок с категориями
-            View rootView = getView();
-            if (rootView != null) {
-                ViewPager viewPager = (ViewPager) rootView.findViewById(R.id.news_categories_pager);
-                NewsCategoriesPagerAdapter adapter = new NewsCategoriesPagerAdapter(
-                        getChildFragmentManager(), null);
-                viewPager.setAdapter(adapter);
-            } else {
-                Log.e(LOG_TAG, "rootView is null on onActivityCreated callback");
-            }
-        } else {
-            Log.e(LOG_TAG, "contextActivity is null on onActivityCreated callback");
-        }
-
-        // запускаем загрузку категорий из базы данных
-        LoaderManager lm = getLoaderManager();
-        if (lm != null)
-            lm.initLoader(NEWS_CATEGORIES_LOADER, null, NewsCategoriesFragment.this).forceLoad();
+        configTabLayout();
 
         // запускаем обновление категорий с сервера
-        if (contextActivity != null)
-            DataUpdateService.startActionUpdateNewsCategories(contextActivity);
-        else {
-            Log.e(LOG_TAG, "rootView is null on onActivityCreated callback");
+        // но только один раз за всё время существования приложения
+        Context context = getContext();
+        ApplicationController app = (ApplicationController) context.getApplicationContext();
+        if (!app.getGlobalValues().getNewsCategoriesWasRequested()) {
+            DataUpdateService.startActionUpdateNewsCategories(context);
+            app.getGlobalValues().setNewsCategoriesWasRequested(true);
+        } else {
+            LoaderManager lm = getLoaderManager();
+            if (lm != null)
+                lm.initLoader(NEWS_CATEGORIES_LOADER, null, NewsCategoriesFragment.this).forceLoad();
         }
     }
 
@@ -152,14 +147,50 @@ public class NewsCategoriesFragment
         }
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
+    private void configTabLayout() {
+        Activity contextActivity = getActivity();
+        if (contextActivity != null) {
+            TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.tab_layout);
+            if (tabLayout != null) {
+                tabLayout.setVisibility(View.VISIBLE);
+                View rootView = getView();
+                if (rootView != null) {
+                    ViewPager viewPager = (ViewPager) rootView.findViewById(R.id.news_categories_pager);
+                    tabLayout.setupWithViewPager(viewPager);
+                } else {
+                    Log.e(LOG_TAG, "rootView is null on onActivityCreated callback");
+                }
+            }
+        }
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
+    private void updateViewPagerData(Cursor pCursor) {
+        View rootView = getView();
+        if (rootView != null) {
+            ArrayList<NewsCategory> newData = new ArrayList<>();
+            if (pCursor.moveToFirst())
+                do {
+                    newData.add(new NewsCategory(pCursor));
+                } while (pCursor.moveToNext());
+            ViewPager viewPager = (ViewPager) rootView.findViewById(R.id.news_categories_pager);
+            NewsCategoriesPagerAdapter adapter = (NewsCategoriesPagerAdapter) viewPager.getAdapter();
+            adapter.updateData(newData);
+
+            if (newData.size() > 0) {
+                if (waitToRestore) {
+                    waitToRestore = false;
+                    viewPager.setCurrentItem(selectedPageIndex);
+                }
+                // если категории есть, то скрываем прогресс
+                View progressView = rootView.findViewById(R.id.news_categories_progress);
+                viewPager.setVisibility(View.VISIBLE);
+                progressView.setVisibility(View.GONE);
+                // делаем, если это самое первое обновление данных
+                if (!firstUpdateComplete) {
+                    firstUpdateComplete = true;
+                }
+            }
+        }
     }
 
     @Override
@@ -171,64 +202,8 @@ public class NewsCategoriesFragment
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (loader.getId() == NEWS_CATEGORIES_LOADER) {
-            View rootView = getView();
-            if (rootView != null) {
-                ArrayList<NewsCategory> newData = new ArrayList<>();
-                if (data.moveToFirst())
-                    do {
-                        newData.add(new NewsCategory(data));
-                    } while (data.moveToNext());
-                ViewPager viewPager = (ViewPager) rootView.findViewById(R.id.news_categories_pager);
-                NewsCategoriesPagerAdapter adapter = (NewsCategoriesPagerAdapter) viewPager.getAdapter();
-                adapter.updateData(newData);
-                if (newData.size() > 0) {
-
-                    if (waitToRestore) {
-                        waitToRestore = false;
-                        viewPager.setCurrentItem(selectedPageIndex);
-                    }
-
-                    // если категории есть, то скрываем прогресс
-                    View progressView = rootView.findViewById(R.id.news_categories_progress);
-                    View offlineView = rootView.findViewById(R.id.news_categories_offline);
-                    viewPager.setVisibility(View.VISIBLE);
-                    progressView.setVisibility(View.GONE);
-                    offlineView.setVisibility(View.GONE);
-                    // запускаем фоновое обновление списка категорий
-                    if (!firstUpdateComplete) {
-                        firstUpdateComplete = true;
-                        Context context = getContext();
-                        if ((context != null) && ConnectionChecker.check(context)) {
-                            DataUpdateService.startActionUpdateNewsCategories(context);
-                        }
-                    }
-                } else {
-                    // если категорий нет, то оставляем pager скрытым
-                    Context context = getContext();
-                    if ((context != null) && ConnectionChecker.check(context)) {
-                        View progressView = rootView.findViewById(R.id.news_categories_progress);
-                        View offlineView = rootView.findViewById(R.id.news_categories_offline);
-                        viewPager.setVisibility(View.GONE);
-                        progressView.setVisibility(View.VISIBLE);
-                        offlineView.setVisibility(View.GONE);
-                        if (!firstUpdateComplete) {
-                            firstUpdateComplete = true;
-                            DataUpdateService.startActionUpdateNewsCategories(context);
-                        }
-                    }
-                    else {
-                        View progressView = rootView.findViewById(R.id.news_categories_progress);
-                        View offlineView = rootView.findViewById(R.id.news_categories_offline);
-                        viewPager.setVisibility(View.GONE);
-                        progressView.setVisibility(View.GONE);
-                        offlineView.setVisibility(View.VISIBLE);
-                    }
-                }
-            } else {
-                Log.e(LOG_TAG, "rootView is null on onLoaderReset callback");
-            }
-        }
+        if (loader.getId() == NEWS_CATEGORIES_LOADER)
+            updateViewPagerData(data);
     }
 
     @Override
