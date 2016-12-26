@@ -130,8 +130,7 @@ public class NewsRecyclerCursorAdapter extends CursorRecyclerViewAdapter<Recycle
                     viewHolder.logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
                     viewHolder.logo.setSource(bigImageCachePath, bigImageCacheMd5);
                 } else {
-                    viewHolder.logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                    viewHolder.logo.setImageResource(R.drawable.ic_newspaper_black_24dp);
+                    viewHolder.logo.setImageDrawable(null);
                 }
                 CacheExecutorProvider.Execute(mContext, CacheTaskFactory.getNewsBigImageCacheTask(id));
             } else {
