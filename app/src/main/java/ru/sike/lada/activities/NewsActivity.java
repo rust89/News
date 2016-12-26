@@ -256,6 +256,21 @@ public class NewsActivity
     }
 
     @Override
+    public void onBackPressed() {
+
+        // если картинка видна не полностью, то отключаем эффект перехода
+        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
+        boolean fullyExpanded =
+                (appBarLayout.getHeight() - appBarLayout.getBottom()) == 0;
+        if (!fullyExpanded) {
+            ImageView newsLogo = (ImageView) findViewById(R.id.news_logo);
+            ViewCompat.setTransitionName(newsLogo, null);
+        }
+
+        super.onBackPressed();
+    }
+
+    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (id == NEWS_LOADER) {
             return new NewsFullCursorLoader(NewsActivity.this, getNewsId());
