@@ -43,7 +43,7 @@ public class Downloader {
     public static byte[] Download(String pUrl) {
         byte[] result = null;
         try {
-            result = Download(new URL(pUrl));
+            result = Download(new URL(pUrl.replace("https://", "http://")));
         } catch (MalformedURLException Ex) {
             Ex.printStackTrace();
         }

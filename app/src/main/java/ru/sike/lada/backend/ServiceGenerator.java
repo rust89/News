@@ -9,9 +9,11 @@ import okhttp3.Request;
 import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import ru.sike.lada.utils.Constants;
 
 public class ServiceGenerator {
-    private static final String baseUrl = "https://www.lada.kz/";
+
+    private static final String baseUrl = Constants.backend_url;
 
     private static OkHttpClient getHttpClient() {
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
