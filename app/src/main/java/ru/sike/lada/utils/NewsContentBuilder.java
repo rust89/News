@@ -69,14 +69,14 @@ public class NewsContentBuilder {
         elements = contentRoot.getElementsByClass(previewClass);
         if (elements.size() > 0) {
             Element previewElement = elements.get(0);
-            viewList.add(new TextViewItem(pContext, previewElement.html(), new PreviewDecorator(pContext)));
+            viewList.add(new TextViewItem(previewElement.html(), new PreviewDecorator()));
         }
         // получаем основной контент для новости
         elements = contentRoot.getElementsByClass(mainClass);
-        viewList.addAll(parseNewsContent(pContext, elements.size() > 0 ? elements.get(0) : null));
+        viewList.addAll(parseNewsContent(elements.size() > 0 ? elements.get(0) : null));
 
         for (ViewItem item : viewList)
-            rootLayout.addView(item.getView());
+            rootLayout.addView(item.getView(pContext));
 
         View newsMainContent = prepareNewsMainContent(pContext, elements.size() > 0 ? elements.get(0) : null);
         if (newsMainContent != null)
@@ -99,7 +99,7 @@ public class NewsContentBuilder {
         return previewLayout;
     }
 
-    private ViewItemList parseNewsContent(Context pContext, Element pContent) {
+    private ViewItemList parseNewsContent(Element pContent) {
         ViewItemList result = new ViewItemList();
         if (pContent == null)
             return result;
@@ -118,7 +118,7 @@ public class NewsContentBuilder {
 
                     // сбрасывваем буферизированный текст, если он есть
                     if (!plainTextBuffer.isEmpty()) {
-                        result.add(new TextViewItem(pContext, plainTextBuffer, new SimpleTextDecorator(pContext)));
+                        result.add(new TextViewItem(plainTextBuffer, new SimpleTextDecorator()));
                         plainTextBuffer = "";
                     }
 
@@ -132,21 +132,23 @@ public class NewsContentBuilder {
                             if (imgTagName.equals(linkFirstChild.tagName())) {
                                 // получаем ссылку на картинку
                                 String imgSrc = linkFirstChild.hasAttr(imgSrcAttribute) ? linkFirstChild.attr(imgSrcAttribute) : "";
-                                result.add(new ImageViewItem(pContext, imgSrc, linkHRef));
+                                result.add(new ImageViewItem(imgSrc, linkHRef));
                             }
+                        } else if (frameTagName.equals(divFirstChild.tagName())) {
+                            result.add(new TextViewItem("Здесь iframe", new SimpleTextDecorator()));
                         }
                     } else {
                         String divContent = element.html().trim();
                         if (!divContent.isEmpty())
-                            result.add(new TextViewItem(pContext, divContent, new SimpleTextDecorator(pContext)));
+                            result.add(new TextViewItem(divContent, new SimpleTextDecorator()));
                     }
                 } else if (brTagName.equals(element.nodeName())) {
                     if (!plainTextBuffer.isEmpty()) {
-                        result.add(new TextViewItem(pContext, plainTextBuffer, new SimpleTextDecorator(pContext)));
+                        result.add(new TextViewItem(plainTextBuffer, new SimpleTextDecorator()));
                         plainTextBuffer = "";
                     }
                 } else if (frameTagName.equals(element.nodeName())) {
-                    result.add(new TextViewItem(pContext, "Здесь iframe", new SimpleTextDecorator(pContext)));
+                    result.add(new TextViewItem("Здесь iframe", new SimpleTextDecorator()));
                 } else {
                     plainTextBuffer += element.outerHtml();
                 }
@@ -154,7 +156,7 @@ public class NewsContentBuilder {
         }
 
         if (!plainTextBuffer.isEmpty()) {
-            result.add(new TextViewItem(pContext, plainTextBuffer, new SimpleTextDecorator(pContext)));
+            result.add(new TextViewItem(plainTextBuffer, new SimpleTextDecorator()));
         }
 
         return result;

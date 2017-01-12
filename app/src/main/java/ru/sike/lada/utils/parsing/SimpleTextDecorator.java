@@ -11,19 +11,20 @@ import ru.sike.lada.utils.parsing.abstraction.ViewDecorator;
 
 public class SimpleTextDecorator extends ViewDecorator {
 
-    public SimpleTextDecorator(Context pContext) {
-        super(pContext);
+    public SimpleTextDecorator() {
+        super();
     }
 
     @Override
     public void Decorate(View pView) {
         TextView textView = (TextView) pView;
         if (textView != null) {
-            int verticalSmallPadding = getContext().getResources().getDimensionPixelOffset(R.dimen.activity_vertical_small_margin);
+            Context context = textView.getContext();
+            int verticalSmallPadding = context.getResources().getDimensionPixelOffset(R.dimen.activity_vertical_small_margin);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutParams.setMargins(0,0,0, verticalSmallPadding);
             textView.setLayoutParams(layoutParams);
-            textView.setTextColor(getContext().getResources().getColor(R.color.fullNewsTextColor));
+            textView.setTextColor(context.getResources().getColor(R.color.fullNewsTextColor));
         }
     }
 }

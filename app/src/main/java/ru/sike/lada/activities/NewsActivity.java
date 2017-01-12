@@ -18,6 +18,10 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import ru.sike.lada.R;
@@ -363,9 +368,45 @@ public class NewsActivity
         TextView newsTitle = (TextView) findViewById(R.id.news_title);
         newsTitle.setText(pNewsItem.getTitle());
 
+        // генерируем тело новости
         FrameLayout newContentContainer = (FrameLayout) findViewById(R.id.new_content);
         NewsContentBuilder newsContentBuilder = new NewsContentBuilder();
         newContentContainer.addView(newsContentBuilder.Build(this, pNewsItem.getHtml()));
+
+        // отображаем автора
+        String newsAuthor = pNewsItem.getAuthor();
+        LinearLayout authorBlock = (LinearLayout) findViewById(R.id.author_block);
+        if (newsAuthor != null && !newsAuthor.isEmpty()) {
+            TextView newsAuthorView = (TextView) findViewById(R.id.news_author);
+            SpannableString content = new SpannableString(newsAuthor);
+            content.setSpan(new UnderlineSpan(), 0, newsAuthor.length(), 0);
+            newsAuthorView.setText(content);
+            authorBlock.setVisibility(View.VISIBLE);
+        } else {
+            authorBlock.setVisibility(View.GONE);
+        }
+
+        // отображаем источник
+        String source = pNewsItem.getSource();
+        String sourceName = pNewsItem.getSourceName();
+        LinearLayout sourceBlock = (LinearLayout) findViewById(R.id.source_block);
+        if (sourceName != null && !sourceName.isEmpty()) {
+            TextView newsSourceView = (TextView) findViewById(R.id.news_source);
+            newsSourceView.setMovementMethod(LinkMovementMethod.getInstance());
+            if (source != null && !source.isEmpty()) {
+                newsSourceView.setText(Html.fromHtml("<a href=\"" + source + "\">" + sourceName + "</a>"));
+            } else {
+                newsSourceView.setText(sourceName);
+            }
+            sourceBlock.setVisibility(View.VISIBLE);
+        } else {
+            sourceBlock.setVisibility(View.GONE);
+        }
+
+        // скрываем нижний вьюв
+        LinearLayout authorAndSourceView = (LinearLayout) findViewById(R.id.author_and_source);
+        authorAndSourceView.setVisibility(authorBlock.getVisibility() == View.VISIBLE
+                || sourceBlock.getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
 
 
         View progressView = findViewById(R.id.progressContainer);

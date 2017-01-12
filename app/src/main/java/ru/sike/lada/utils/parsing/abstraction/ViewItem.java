@@ -8,15 +8,8 @@ import android.view.View;
  */
 public abstract class ViewItem {
 
-    private Context mContext;
-
-    public ViewItem(Context pContext) {
-        mContext = pContext;
+    public ViewItem() {
     }
 
-    protected Context getContext() {
-        return mContext;
-    }
-
-    public abstract View getView();
+    public abstract View getView(Context pContext);
 }

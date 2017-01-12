@@ -165,14 +165,13 @@
                     android:id="@+id/news_footer_divider"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginBottom="@dimen/activity_vertical_small_margin"
                     android:background="@color/newsItemFooterDividerColor"/>
 
                 <LinearLayout
                     android:id="@+id/author_block"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/activity_vertical_small_margin"
+                    android:layout_marginTop="@dimen/activity_vertical_small_margin"
                     android:orientation="horizontal">
                     <TextView
                         android:layout_width="wrap_content"
@@ -183,15 +182,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="@dimen/activity_horizontal_small_margin"
-                        android:layout_marginStart="@dimen/activity_horizontal_small_margin"
-                        android:text="Иванов Иван Иванович"/>
+                        android:layout_marginStart="@dimen/activity_horizontal_small_margin" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/source_block"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/activity_vertical_small_margin"
+                    android:layout_marginTop="@dimen/activity_vertical_small_margin"
                     android:orientation="horizontal">
                     <TextView
                         android:layout_width="wrap_content"
@@ -202,16 +200,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="@dimen/activity_horizontal_small_margin"
-                        android:layout_marginStart="@dimen/activity_horizontal_small_margin"
-                        android:text="Интернеты"/>
+                        android:layout_marginStart="@dimen/activity_horizontal_small_margin" />
                 </LinearLayout>
 
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/test_html"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
