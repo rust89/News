@@ -115,6 +115,13 @@ public class NewsContentBuilder {
             } else if (child instanceof Element) {
                 Element element = (Element) child;
                 if (divTagName.equals(element.nodeName())) {
+
+                    // сбрасывваем буферизированный текст, если он есть
+                    if (!plainTextBuffer.isEmpty()) {
+                        result.add(new TextViewItem(pContext, plainTextBuffer, new SimpleTextDecorator(pContext)));
+                        plainTextBuffer = "";
+                    }
+
                     Element divFirstChild = element.children().first();
                     if (divFirstChild != null) {
                         if (linkTagName.equals(divFirstChild.tagName())) {

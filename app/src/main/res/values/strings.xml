@@ -28,5 +28,7 @@
 
     <string name="activity_news_msg_bookmark_add">Новость добавлена в закладки</string>
     <string name="activity_news_msg_bookmark_remove">Новость удалена из закладок</string>
+    <string name="activity_news_author">Автор:</string>
+    <string name="activity_news_source">Источник:</string>
 
 </resources>
