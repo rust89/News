@@ -37,6 +37,7 @@ public class NewsContentBuilder {
     private static final String linkTagName = "a";
     private static final String imgTagName = "img";
     private static final String brTagName = "br";
+    private static final String frameTagName = "iframe";
 
     private static final String linkHRefAttribute = "href";
     private static final String imgSrcAttribute = "src";
@@ -127,12 +128,18 @@ public class NewsContentBuilder {
                                 result.add(new ImageViewItem(pContext, imgSrc, linkHRef));
                             }
                         }
+                    } else {
+                        String divContent = element.html().trim();
+                        if (!divContent.isEmpty())
+                            result.add(new TextViewItem(pContext, divContent, new SimpleTextDecorator(pContext)));
                     }
                 } else if (brTagName.equals(element.nodeName())) {
                     if (!plainTextBuffer.isEmpty()) {
                         result.add(new TextViewItem(pContext, plainTextBuffer, new SimpleTextDecorator(pContext)));
                         plainTextBuffer = "";
                     }
+                } else if (frameTagName.equals(element.nodeName())) {
+                    result.add(new TextViewItem(pContext, "Здесь iframe", new SimpleTextDecorator(pContext)));
                 } else {
                     plainTextBuffer += element.outerHtml();
                 }

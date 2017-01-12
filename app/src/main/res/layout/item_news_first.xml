@@ -100,16 +100,6 @@
             android:textColor="@color/newsItemFooterFontColor"
             android:textSize="@dimen/item_news_footer_font_size"/>
 
-        <!--
-
-
-
-
-
-
-
-
-        -->
     </RelativeLayout>
 
 </android.support.v7.widget.CardView>
