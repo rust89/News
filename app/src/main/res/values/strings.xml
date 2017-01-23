@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Новости</string>
 
+    <string name="youtube_api_key">AIzaSyCIM6xYZrf8uqmPR4ZmJg5qhKjYVNl-wtw</string>
+
     <string name="text_cancel">Отмена</string>
     <string name="text_no_internet">Отсутствует подключение к интернету</string>
     <string name="text_content_loading">Загрузка содержимого</string>

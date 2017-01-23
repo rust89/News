@@ -31,6 +31,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.youtube.player.YouTubeInitializationResult;
+import com.google.android.youtube.player.YouTubePlayer;
+import com.google.android.youtube.player.YouTubePlayerFragment;
+import com.google.android.youtube.player.YouTubePlayerView;
 
 import ru.sike.lada.R;
 import ru.sike.lada.loaders.BookmarkCursorLoader;
@@ -52,6 +58,8 @@ public class NewsActivity
 
     private static final int NEWS_LOADER = 1;
     private static final int BOOKMARK_LOADER = 2;
+
+    private static final int RECOVERY_DIALOG_REQUEST = 1;
 
     enum BookmarkStatus {
         UNDEFINED,
@@ -415,4 +423,20 @@ public class NewsActivity
         progressView.setVisibility(View.GONE);
         contentContainer.setVisibility(View.VISIBLE);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        /*
+        if (requestCode == RECOVERY_DIALOG_REQUEST) {
+            // Retry initialization if user performed a recovery action
+            getYouTubePlayerProvider().initialize(getString(R.string.youtube_api_key), this);
+        }
+        */
+    }
+
+    /*
+    protected YouTubePlayer.Provider getYouTubePlayerProvider() {
+        return (YouTubePlayerView)findViewById(R.id.youtubeplayerfragment);
+    }
+    */
 }

@@ -22,6 +22,7 @@ import ru.sike.lada.utils.parsing.ImageViewItem;
 import ru.sike.lada.utils.parsing.PreviewDecorator;
 import ru.sike.lada.utils.parsing.SimpleTextDecorator;
 import ru.sike.lada.utils.parsing.TextViewItem;
+import ru.sike.lada.utils.parsing.YoutubeViewItem;
 import ru.sike.lada.utils.parsing.abstraction.ViewItem;
 import ru.sike.lada.utils.parsing.abstraction.ViewItemList;
 
@@ -41,6 +42,7 @@ public class NewsContentBuilder {
 
     private static final String linkHRefAttribute = "href";
     private static final String imgSrcAttribute = "src";
+    private static final String frameSrcAttribute = "src";
 
     /**
      * Выполняет построение представление с содержимым новости
@@ -135,7 +137,13 @@ public class NewsContentBuilder {
                                 result.add(new ImageViewItem(imgSrc, linkHRef));
                             }
                         } else if (frameTagName.equals(divFirstChild.tagName())) {
-                            result.add(new TextViewItem("Здесь iframe", new SimpleTextDecorator()));
+                            String frameSrc = divFirstChild.hasAttr(frameSrcAttribute) ? divFirstChild.attr(frameSrcAttribute) : "";
+                            if (frameSrc != null && !frameSrc.isEmpty()) {
+                                if (frameSrc.indexOf("https://www.youtube.com/embed/") == 0) {
+                                    String lastUrlSegment = frameSrc.replaceFirst(".*/([^/?]+).*", "$1");
+                                    result.add(new YoutubeViewItem(lastUrlSegment));
+                                }
+                            }
                         }
                     } else {
                         String divContent = element.html().trim();
@@ -148,7 +156,13 @@ public class NewsContentBuilder {
                         plainTextBuffer = "";
                     }
                 } else if (frameTagName.equals(element.nodeName())) {
-                    result.add(new TextViewItem("Здесь iframe", new SimpleTextDecorator()));
+                    String frameSrc = element.hasAttr(frameSrcAttribute) ? element.attr(frameSrcAttribute) : "";
+                    if (frameSrc != null && !frameSrc.isEmpty()) {
+                        if (frameSrc.indexOf("https://www.youtube.com/embed/") == 0) {
+                            String lastUrlSegment = frameSrc.replaceFirst(".*/([^/?]+).*", "$1");
+                            result.add(new YoutubeViewItem(lastUrlSegment));
+                        }
+                    }
                 } else {
                     plainTextBuffer += element.outerHtml();
                 }
