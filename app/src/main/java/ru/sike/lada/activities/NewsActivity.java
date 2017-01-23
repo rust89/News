@@ -341,6 +341,10 @@ public class NewsActivity
             outState.putParcelable(NEWS_BUNDLE_NAME, mNews);
     }
 
+    /**
+     * Построение полной новости на основе объекта
+     * @param pNewsItem
+     */
     private void InitActivityView(News pNewsItem) {
         // устанавливаем картинку для новости
         String pictureCachePath = pNewsItem.getBigPictureCachePath();

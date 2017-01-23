@@ -56,7 +56,7 @@ public class NewsListFragment
     private boolean waitForUpdateComplete = false;
     static int mPreviousLastVisibleItemPostion = -1;
 
-    // создаем BroadcastReceiver
+    // создаем BroadcastReceiver отслеживающий обновление списка новостей
     ShortNewsListUpdateCompleteReceivers mShortNewsListUpdateCompleteReceivers = new ShortNewsListUpdateCompleteReceivers() {
         // действия при получении сообщений
         public void onReceive(Context context, Intent intent) {
@@ -74,6 +74,12 @@ public class NewsListFragment
         // Required empty public constructor
     }
 
+    /**
+     * Фабричный метод
+     * @param categoryId Идентификатор категории
+     * @param categoryName Имя категории
+     * @return
+     */
     public static NewsListFragment newInstance(long categoryId, String categoryName) {
         NewsListFragment result = new NewsListFragment();
         Bundle b = new Bundle();
@@ -83,6 +89,12 @@ public class NewsListFragment
         return result;
     }
 
+    /**
+     * Запускает сервис обновления списка новостей
+     * @param pCategoryId
+     * @param pFetchNewsFrom Получить новость начиная с
+     * @param pFetchNewsCountPerRequest Количество новостей в ответе
+     */
     private void startUpdateService(long pCategoryId, int pFetchNewsFrom, int pFetchNewsCountPerRequest) {
         Log.d(LOG_TAG, "startUpdateService");
         if (!waitForUpdateComplete) {
@@ -91,6 +103,11 @@ public class NewsListFragment
         }
     }
 
+    /**
+     * Возвращает идентификатор категории из ассоциированного Bundle объекта
+     * @return
+     * @throws Exception
+     */
     private long getCategoryId() throws Exception {
         Bundle args = getArguments();
         if ((args != null) && args.containsKey(CATEGORY_ID_BUNDLE_NAME)) {
@@ -100,6 +117,11 @@ public class NewsListFragment
         }
     }
 
+    /**
+     * Возвращает имя категории из ассоциированного Bundle объекта
+     * @return
+     * @throws Exception
+     */
     private String getCategoryName() throws Exception {
         Bundle args = getArguments();
         if ((args != null) && args.containsKey(CATEGORY_NAME_BUNDLE_NAME)) {
@@ -109,6 +131,11 @@ public class NewsListFragment
         }
     }
 
+    /**
+     * Скрывает индикатор загрузки и отображает дополнительное сообщение в случае необходимости
+     * @param pShowMessage
+     * @param pMessage
+     */
     private void HideProgressWithMessage(boolean pShowMessage, String pMessage) {
         // останавливаем индикатор загрузки,
         // убираем индикатор загрузки из списка
@@ -129,6 +156,11 @@ public class NewsListFragment
         }
     }
 
+    /**
+     * Вызывается при окончании попытки обновления списка новостей
+     * @param pStatus Успешность операции
+     * @param pMessage Дополнительное текстовое сообщение.
+     */
     private void UpdateShortNewsListComplete(ShortNewsListUpdateCompleteReceivers.Status pStatus, String pMessage) {
         if (pStatus == ShortNewsListUpdateCompleteReceivers.Status.Success
                 || pStatus == ShortNewsListUpdateCompleteReceivers.Status.Fail) {

@@ -47,6 +47,9 @@ public class NewsCategoriesFragment
     private int selectedPageIndex = 0;
     private boolean waitToRestore = false;
 
+    /**
+     * Broadcast ресивер слушающий обновление списка категорий
+     */
     NewsCategoryUpdateReceiver mNewsCategoryUpdateReceiver = new NewsCategoryUpdateReceiver() {
         // действия при получении сообщений
         public void onReceive(Context context, Intent intent) {
@@ -78,14 +81,12 @@ public class NewsCategoriesFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(LOG_TAG, "onCreate");
         getActivity().registerReceiver(mNewsCategoryUpdateReceiver, new IntentFilter(NewsCategoryUpdateReceiver.BROADCAST_ACTION));
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i(LOG_TAG, "onDestroy");
         getActivity().unregisterReceiver(mNewsCategoryUpdateReceiver);
     }
 

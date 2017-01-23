@@ -11,8 +11,8 @@ public class SpashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+
+        startActivity(new Intent(this, MainActivity.class));
         finish();
     }
 }
