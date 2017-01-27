@@ -10,7 +10,7 @@ public final class Constants {
     /**
      * Доменное имя сервера
      */
-    public static final String backend_domain_name = "www.7292.kz"; // "www.lada.kz"
+    public static final String backend_domain_name = "www.lada.kz"; // "www.7292.kz"
 
     /**
      * Адрес сервера

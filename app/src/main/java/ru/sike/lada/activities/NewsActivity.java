@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -22,11 +23,13 @@ import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.style.UnderlineSpan;
+import android.transition.Explode;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -145,7 +148,18 @@ public class NewsActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        // inside your activity (if you did not enable transitions in your theme)
+        // For AppCompat getWindow must be called before calling super.OnCreate
+        // Must be called before setContentView
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+
         super.onCreate(savedInstanceState);
+
+        // set an exit transition
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            getWindow().setExitTransition(new Explode());
 
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(NEWS_BUNDLE_NAME))
