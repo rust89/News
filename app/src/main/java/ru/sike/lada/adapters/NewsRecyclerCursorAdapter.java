@@ -10,6 +10,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import ru.sike.lada.R;
+import ru.sike.lada.adapters.holders.NewsItemViewHolder;
+import ru.sike.lada.adapters.holders.NewsSpinnerViewHolder;
+import ru.sike.lada.adapters.interfaces.IOnNewsItemClickListener;
+import ru.sike.lada.adapters.listenters.NewsItemClickHandler;
 import ru.sike.lada.utils.DateUtils;
 import ru.sike.lada.utils.DrawableUtils;
 import ru.sike.lada.utils.caching.CacheExecutorProvider;
@@ -19,18 +23,20 @@ public class NewsRecyclerCursorAdapter extends CursorRecyclerViewAdapter<Recycle
 
     private static final String LOG_TAG = "NsRrCursorAdapter";
 
-    private IOnItemClickListener mOnItemClickListener;
+    private IOnNewsItemClickListener mOnItemClickListener;
     private String mToday;
     private String mYesterday;
     private String mDayBeforeYesterday;
+    NewsItemColumnMapHelper mNewsItemColumnMapHelper;
     private boolean mFooterVisible = false;
 
-    public NewsRecyclerCursorAdapter(Context pContext, Cursor pCursor, IOnItemClickListener pOnItemClickListener){
+    public NewsRecyclerCursorAdapter(Context pContext, Cursor pCursor, IOnNewsItemClickListener pOnItemClickListener){
         super(pContext, pCursor);
         mOnItemClickListener = pOnItemClickListener;
         mToday = pContext.getString(R.string.text_today);
         mYesterday = pContext.getString(R.string.text_yesterday);
         mDayBeforeYesterday = pContext.getString(R.string.text_day_before_yesterday);
+        mNewsItemColumnMapHelper = new NewsItemColumnMapHelper(pCursor);
         setHasStableIds(true);
     }
 
@@ -62,8 +68,7 @@ public class NewsRecyclerCursorAdapter extends CursorRecyclerViewAdapter<Recycle
 
             // получаем значения полей
             NewsItemViewHolder viewHolder = (NewsItemViewHolder)pViewHolder;
-
-            final NewItemCursorWrapper newsItem = new NewItemCursorWrapper(pCursor, new NewsItemColumnMapHelper(pCursor));
+            NewItemCursorWrapper newsItem = new NewItemCursorWrapper(pCursor, mNewsItemColumnMapHelper);
 
             // для первой записи загружаем большую картинку
             if (pCursor.getPosition() == 0) {
@@ -75,7 +80,7 @@ public class NewsRecyclerCursorAdapter extends CursorRecyclerViewAdapter<Recycle
                 }
                 CacheExecutorProvider.Execute(mContext, CacheTaskFactory.getNewsBigImageCacheTask(newsItem.getId()));
             } else {
-                if (newsItem.getSmallImageCachePath().isEmpty()) {
+                if (!newsItem.getSmallImageCachePath().isEmpty()) {
                     viewHolder.getLogo().setScaleType(ImageView.ScaleType.CENTER_CROP);
                     viewHolder.getLogo().setSource(newsItem.getSmallImageCachePath(), newsItem.getSmallImageCacheMd5());
                 } else {
@@ -92,14 +97,13 @@ public class NewsRecyclerCursorAdapter extends CursorRecyclerViewAdapter<Recycle
             viewHolder.getViewCount().setText(String.valueOf(newsItem.getViewCount()));
             viewHolder.getDate().setText(DateUtils.formatDate(newsItem.getDate(), mToday, mYesterday, mDayBeforeYesterday));
 
-            viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (mOnItemClickListener != null)
-                        mOnItemClickListener.onItemClick(newsItem.getId(), view,
-                                (!newsItem.getBigImageCachePath().isEmpty() ? newsItem.getBigImageCachePath() : newsItem.getSmallImageCachePath()) );
-                }
-            });
+            viewHolder.itemView.setOnClickListener(
+                    new NewsItemClickHandler(
+                            newsItem.getId(),
+                            (!newsItem.getBigImageCachePath().isEmpty() ? newsItem.getBigImageCachePath() : newsItem.getSmallImageCachePath()),
+                            mOnItemClickListener
+                    )
+            );
 
             Drawable d = mContext.getResources().getDrawable(R.drawable.ic_bookmark_black_24dp);
             if (newsItem.getBookmark()) {
@@ -126,16 +130,6 @@ public class NewsRecyclerCursorAdapter extends CursorRecyclerViewAdapter<Recycle
                 notifyItemRangeRemoved(positionStart + 1, 1);
             }
         }
-    }
-
-    @Override
-    public Cursor swapCursor(Cursor newCursor) {
-        Cursor result = super.swapCursor(newCursor);
-        return result;
-    }
-
-    public interface IOnItemClickListener {
-        void onItemClick(long newsId, View view, String pTransitionImagePath);
     }
 
 }

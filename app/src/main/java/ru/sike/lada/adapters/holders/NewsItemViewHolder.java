@@ -1,4 +1,4 @@
-package ru.sike.lada.adapters;
+package ru.sike.lada.adapters.holders;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;

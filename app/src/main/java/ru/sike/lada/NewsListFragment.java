@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 
 import ru.sike.lada.activities.NewsActivity;
 import ru.sike.lada.adapters.NewsRecyclerCursorAdapter;
+import ru.sike.lada.adapters.interfaces.IOnNewsItemClickListener;
 import ru.sike.lada.loaders.NewsShortCursorLoader;
 import ru.sike.lada.receivers.ShortNewsListUpdateCompleteReceivers;
 import ru.sike.lada.services.DataUpdateService;
@@ -232,7 +233,7 @@ public class NewsListFragment
                 RecyclerView listNews = (RecyclerView) rootView.findViewById(R.id.list_news);
                 if (listNews != null) {
                     listNews.setLayoutManager(new LinearLayoutManager(contextActivity));
-                    listNews.setAdapter(new NewsRecyclerCursorAdapter(contextActivity, null, new NewsRecyclerCursorAdapter.IOnItemClickListener() {
+                    listNews.setAdapter(new NewsRecyclerCursorAdapter(contextActivity, null, new IOnNewsItemClickListener() {
                         @Override
                         public void onItemClick(long newsId, View view, String pTransitionImagePath) {
                             Context context = getContext();
